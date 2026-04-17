@@ -21,8 +21,10 @@ tags:
   - name: Calls
   - name: CloudTelephony
   - name: Company
+  - name: CrossProcessTransfer
   - name: CustomColumns
   - name: CustomerSearch
+  - name: CustomerTransfer
   - name: Customers
   - name: DNCR
   - name: DataCleanup
@@ -34,6 +36,7 @@ tags:
   - name: Fcm
   - name: Files
   - name: Followups
+  - name: GmailIntegration
   - name: Hierarchy
   - name: InsightRules
   - name: Integration
@@ -41,7 +44,6 @@ tags:
   - name: Invites
   - name: Licenses
   - name: LiveMonitor
-  - name: Notifications
   - name: Password
   - name: Payments
   - name: Processes
@@ -56,6 +58,7 @@ tags:
   - name: Templates
   - name: TimeLog
   - name: Transfers
+  - name: UniversalCallerNumbers
   - name: UploadData
   - name: Usage
   - name: Users
@@ -685,63 +688,6 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  '/analytics/group/input/output/analytics/input/{processType}/{fromEpoch}/{toEpoch}':
-    post:
-      operationId: dashboardAnalyticsService_getOnlyInputAnalytics
-      tags:
-        - Analytics
-      summary: Get input analytics
-      parameters:
-        - name: processType
-          in: path
-          required: true
-          schema:
-            type: string
-            enum:
-              - inbound
-              - outbound
-              - both
-        - name: fromEpoch
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: toEpoch
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: timeZoneOffset
-          in: query
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                ids:
-                  type: array
-                  items:
-                    type: string
-              required:
-                - ids
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InputAnalyticsResponse'
-        '400':
-          description: Bad request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Internal server error
   '/analytics/group/input/output/open/{processType}/{todayMidnightEpoch}/{fromEpoch}/{toEpoch}':
     post:
       operationId: dashboardAnalyticsService_getAllAnalytics
@@ -874,6 +820,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InputOutputAnalyticsResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  '/analytics/input/{processType}/{fromEpoch}/{toEpoch}':
+    post:
+      operationId: dashboardAnalyticsService_getOnlyInputAnalytics
+      tags:
+        - Analytics
+      summary: Get input analytics
+      parameters:
+        - name: processType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - inbound
+              - outbound
+              - both
+        - name: fromEpoch
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: toEpoch
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: timeZoneOffset
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - ids
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InputAnalyticsResponse'
         '400':
           description: Bad request
         '401':
@@ -1513,7 +1516,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /company/call-analysis/insight-rules/:
+  /company/call-analysis/insight-rules:
     post:
       operationId: insightRulesService_createInsightRule
       tags:
@@ -1716,12 +1719,12 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /company/cloudtelephony/virtualnumbers/list/available:
+  /company/cloudtelephony/callerids/list:
     get:
-      operationId: virtualNumberService_getVirtualNumberList
+      operationId: universalCallerNumberService_getUniversalCallerNumberList
       tags:
-        - VirtualNumbers
-      summary: Get available virtual numbers
+        - UniversalCallerNumbers
+      summary: Get available universal caller numbers
       responses:
         '200':
           description: Successful response
@@ -1735,31 +1738,19 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  '/company/cloudtelephony/{userId}':
-    put:
-      operationId: virtualNumberService_updateVirtualNumberOfUser
+  /company/cloudtelephony/virtualnumbers/list/available:
+    get:
+      operationId: virtualNumberService_getVirtualNumberList
       tags:
         - VirtualNumbers
-      summary: Update a user virtual number
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CloudTelephony'
+      summary: Get available virtual numbers
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericResponse'
+                $ref: '#/components/schemas/CTNumberListResponse'
         '400':
           description: Bad request
         '401':
@@ -1884,12 +1875,92 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /company/ct/assign/bulk:
-    post:
-      operationId: virtualNumberService_updateBulkVirtualNumberOfUser
+  /company/customer-process/transfer:
+    get:
+      operationId: crossProcessTransferService_getConfigByProcessPair
       tags:
-        - VirtualNumbers
-      summary: Assign virtual numbers in bulk
+        - CrossProcessTransfer
+      summary: Get cross process transfer config by process pair
+      parameters:
+        - name: fromProcessId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: toProcessId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                nullable: true
+                allOf:
+                  - $ref: '#/components/schemas/CustomerTransferConfig'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+    post:
+      operationId: crossProcessTransferService_createConfig
+      tags:
+        - CrossProcessTransfer
+      summary: Create a cross process transfer config
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  '/company/customer-process/transfer/{configId}':
+    put:
+      operationId: crossProcessTransferService_updateConfig
+      tags:
+        - CrossProcessTransfer
+      summary: Update a cross process transfer config
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+    delete:
+      operationId: crossProcessTransferService_deleteConfig
+      tags:
+        - CrossProcessTransfer
+      summary: Delete a cross process transfer config
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful response
@@ -2011,7 +2082,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /company/dnt/:
+  /company/dnt:
     get:
       operationId: doNotTrackService_getAllDNTNumbers
       tags:
@@ -2175,31 +2246,6 @@ paths:
       tags:
         - ScoringCriteria
       summary: Update scoring configuration
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        '400':
-          description: Bad request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Internal server error
-  /company/notification/status:
-    post:
-      operationId: notificationService_triggerFcmNotification
-      tags:
-        - Notifications
-      summary: Trigger FCM notification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserStatusNotificationPayload'
       responses:
         '200':
           description: Successful response
@@ -2478,7 +2524,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /company/role/:
+  /company/role:
     post:
       operationId: rolesAndPermissionsService_createNewRole
       tags:
@@ -2768,7 +2814,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /company/workflow/:
+  /company/workflow:
     get:
       operationId: allocationRulesService_getWorkFlowRulesList
       tags:
@@ -3573,11 +3619,11 @@ paths:
           required: false
           schema:
             type: boolean
-        - name: searchBy
-          in: query
-          required: false
-          schema:
-            type: string
+        # - name: searchBy      #enum is there
+        #   in: query
+        #   required: false
+        #   schema:
+        #     type: string
         - name: type
           in: query
           required: false
@@ -4035,7 +4081,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /customer/interaction/sms/:
+  /customer/interaction/sms:
     post:
       operationId: smsInteractionService_saveSmsInteraction
       tags:
@@ -4060,7 +4106,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /customer/interaction/whatsapp/:
+  /customer/interaction/whatsapp:
     post:
       operationId: whatsAppInteractionService_saveWhatsAppInteraction
       tags:
@@ -4287,6 +4333,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomerSearchResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /customer/transfer:
+    post:
+      operationId: customerTransferService_transferCustomer
+      tags:
+        - CustomerTransfer
+      summary: Transfer a customer to another process
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '400':
           description: Bad request
         '401':
@@ -4591,7 +4656,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DataCleanupStatusResponse'
+                $ref: '#/components/schemas/HistoryResponse'
         '400':
           description: Bad request
         '401':
@@ -4636,7 +4701,26 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /reports/request/:
+  /integration/gmail/disconnect:
+    post:
+      operationId: emailInboxService_disconnectGmail
+      tags:
+        - GmailIntegration
+      summary: Disconnect Gmail account
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /reports/request:
     post:
       operationId: requestReportService_getReports
       tags:
@@ -5072,6 +5156,56 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TimeLogPayload'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  '/user/cloudtelephony/{userId}':
+    put:
+      operationId: virtualNumberService_updateVirtualNumberOfUser
+      tags:
+        - VirtualNumbers
+      summary: Update a user virtual number
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloudTelephony'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /user/ct/assign/bulk:
+    post:
+      operationId: virtualNumberService_updateBulkVirtualNumberOfUser
+      tags:
+        - VirtualNumbers
+      summary: Assign virtual numbers in bulk
       responses:
         '200':
           description: Successful response
@@ -5556,7 +5690,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RechurnStatusResponse'
+                $ref: '#/components/schemas/HistoryResponse'
         '400':
           description: Bad request
         '401':
@@ -5988,7 +6122,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /user/transfer/allocations/:
+  /user/transfer/allocations:
     post:
       operationId: transferService_transferData
       tags:
@@ -6147,6 +6281,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  '/user/transfer/history/{fromEpoch}/{toEpoch}/{perPageItems}/{pageNo}':
+    get:
+      operationId: transferService_getTransferHistory
+      tags:
+        - Transfers
+      summary: Get transfer history
+      parameters:
+        - name: fromEpoch
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: toEpoch
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: perPageItems
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: pageNo
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: processId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
         '400':
           description: Bad request
         '401':
@@ -6404,6 +6583,66 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  '/v1/user/email/inbox/thread/{threadId}':
+    get:
+      operationId: emailInboxService_getEmailThread
+      tags:
+        - GmailIntegration
+      summary: Get email thread detail
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /v1/user/email/inbox/threads:
+    get:
+      operationId: emailInboxService_getEmailThreads
+      tags:
+        - GmailIntegration
+      summary: Get email inbox threads
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: pageToken
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
   '/v1/user/email/interaction/{interactionId}':
     delete:
       operationId: emailInteractionService_deleteEmailInteraction
@@ -6423,6 +6662,25 @@ paths:
             application/json:
               schema:
                 type: boolean
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /v1/user/email/status:
+    get:
+      operationId: emailInboxService_getConnectionStatus
+      tags:
+        - GmailIntegration
+      summary: Get Gmail connection status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '400':
           description: Bad request
         '401':
@@ -6792,6 +7050,54 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /web/integration/config/facebook/status:
+    get:
+      operationId: integrationService_getFacebookIntegrationStatus
+      tags:
+        - Integration
+      summary: Get Facebook integration status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacebookIntegrationStatusResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+    put:
+      operationId: integrationService_updateFacebookIntegrationStatus
+      tags:
+        - Integration
+      summary: Update Facebook integration status
+      parameters:
+        - name: action
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - connect
+              - disconnect
+              - pause
+              - resume
       responses:
         '200':
           description: Successful response
@@ -7552,7 +7858,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
-  /whatsapp/template/:
+  /whatsapp/template:
     post:
       operationId: createEditWabaTemplateService_createTemplate
       tags:
@@ -8634,7 +8940,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data12'
+          $ref: '#/components/schemas/Data11'
         message:
           type: string
         statusCode:
@@ -8963,7 +9269,7 @@ components:
         metadata:
           nullable: true
           allOf:
-            - $ref: '#/components/schemas/Metadata14'
+            - $ref: '#/components/schemas/Metadata13'
         session:
           nullable: true
           type: string
@@ -9169,6 +9475,19 @@ components:
             $ref: '#/components/schemas/Boolean'
       required:
         - booleans
+    BulkActions:
+      type: object
+      properties:
+        blkDel (bulkDelete):
+          type: boolean
+        blkExp (bulkExport):
+          type: boolean
+        blkImp (bulkImport):
+          type: boolean
+      required:
+        - blkImp (bulkImport)
+        - blkExp (bulkExport)
+        - blkDel (bulkDelete)
     BulkAddOnPayload:
       type: object
       properties:
@@ -9976,79 +10295,6 @@ components:
       required:
         - name
         - city
-    CleanupData:
-      type: object
-      properties:
-        atmpCalCnt (attemptedCallFilter):
-          nullable: true
-          type: string
-        count:
-          $ref: '#/components/schemas/CleanupDataCount'
-        createdAt:
-          type: integer
-          format: int64
-        downloadData:
-          type: boolean
-        endEpoch:
-          nullable: true
-          type: integer
-          format: int64
-        filters:
-          type: array
-          items:
-            type: object
-        loc (selectedLocations):
-          nullable: true
-          type: array
-          items:
-            $ref: '#/components/schemas/LocationFilter'
-        startEpoch:
-          nullable: true
-          type: integer
-          format: int64
-        status:
-          type: string
-        user:
-          $ref: '#/components/schemas/CleanupStatusUser'
-      required:
-        - user
-        - count
-        - status
-        - createdAt
-        - downloadData
-        - filters
-    CleanupDataCount:
-      type: object
-      properties:
-        done:
-          type: integer
-          format: int64
-        failed:
-          type: integer
-          format: int64
-        total:
-          type: integer
-          format: int64
-      required:
-        - total
-        - done
-        - failed
-    CleanupStatusUser:
-      type: object
-      properties:
-        _id (id):
-          type: string
-        email:
-          type: string
-        name:
-          type: string
-        processId:
-          type: string
-      required:
-        - _id (id)
-        - name
-        - processId
-        - email
     CloudTelephony:
       type: object
       properties:
@@ -10402,22 +10648,6 @@ components:
       required:
         - phone_number (phoneNumber)
         - email
-    Count:
-      type: object
-      properties:
-        done:
-          type: integer
-          format: int64
-        failed:
-          type: integer
-          format: int64
-        total:
-          type: integer
-          format: int64
-      required:
-        - total
-        - done
-        - failed
     CountData:
       type: object
       properties:
@@ -10760,6 +10990,29 @@ components:
       required:
         - statusCode
         - message
+    CrossProcessTransferLog:
+      type: object
+      properties:
+        assign:
+          $ref: '#/components/schemas/TransferAssign'
+        fromProcessId:
+          type: string
+        fromProcessName:
+          type: string
+        toProcessId:
+          type: string
+        toProcessName:
+          type: string
+        transferredAt:
+          type: integer
+          format: int64
+      required:
+        - assign
+        - fromProcessId
+        - fromProcessName
+        - toProcessId
+        - toProcessName
+        - transferredAt
     Ct:
       type: object
       properties:
@@ -10989,6 +11242,9 @@ components:
           type: boolean
         restrictHistory:
           type: boolean
+        transferBetweenProcesses:
+          nullable: true
+          type: boolean
         viewCustomer:
           type: boolean
       required:
@@ -11120,7 +11376,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data10'
+          $ref: '#/components/schemas/Data9'
         message:
           type: string
         statusCode:
@@ -11198,6 +11454,38 @@ components:
         - stage (name)
         - total (count)
         - statusCounts (statusDataList)
+    CustomerTransferConfig:
+      type: object
+      properties:
+        _id (id):
+          type: string
+        cAt (createdAt):
+          type: integer
+          format: int64
+        cFMs (fieldMappings):
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferCustomFieldMapping'
+        cId (companyId):
+          type: string
+        fPId (fromProcessId):
+          type: string
+        tPId (toProcessId):
+          type: string
+        uAt (updatedAt):
+          type: integer
+          format: int64
+        uUId (updatedByUserId):
+          type: string
+      required:
+        - _id (id)
+        - cId (companyId)
+        - fPId (fromProcessId)
+        - tPId (toProcessId)
+        - cFMs (fieldMappings)
+        - uUId (updatedByUserId)
+        - cAt (createdAt)
+        - uAt (updatedAt)
     CustomersByFieldData:
       type: object
       properties:
@@ -11286,20 +11574,6 @@ components:
     Data10:
       type: object
       properties:
-        customers:
-          type: array
-          items:
-            $ref: '#/components/schemas/Customer'
-        metadata:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metadata9'
-      required:
-        - metadata
-        - customers
-    Data11:
-      type: object
-      properties:
         followups:
           type: array
           items:
@@ -11307,11 +11581,11 @@ components:
         metadata:
           type: array
           items:
-            $ref: '#/components/schemas/Metadata10'
+            $ref: '#/components/schemas/Metadata9'
       required:
         - metadata
         - followups
-    Data12:
+    Data11:
       type: object
       properties:
         attempted:
@@ -11326,7 +11600,7 @@ components:
         metadata:
           type: array
           items:
-            $ref: '#/components/schemas/Metadata11'
+            $ref: '#/components/schemas/Metadata10'
         notAttempted:
           type: array
           items:
@@ -11335,13 +11609,13 @@ components:
         - metadata
         - attempted
         - notAttempted
-    Data13:
+    Data12:
       type: object
       properties:
         metadata:
           type: array
           items:
-            $ref: '#/components/schemas/Metadata12'
+            $ref: '#/components/schemas/Metadata11'
         reportsHistory:
           type: array
           items:
@@ -11349,20 +11623,20 @@ components:
       required:
         - metadata
         - reportsHistory
-    Data14:
+    Data13:
       type: object
       properties:
         sessionToken:
           type: string
       required:
         - sessionToken
-    Data15:
+    Data14:
       type: object
       properties:
         metadata:
           type: array
           items:
-            $ref: '#/components/schemas/Metadata15'
+            $ref: '#/components/schemas/Metadata14'
         usersList:
           type: array
           items:
@@ -11370,21 +11644,7 @@ components:
       required:
         - metadata
         - usersList
-    Data16:
-      type: object
-      properties:
-        cleanupData:
-          type: array
-          items:
-            $ref: '#/components/schemas/CleanupData'
-        metadata:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metadata16'
-      required:
-        - metadata
-        - cleanupData
-    Data17:
+    Data15:
       type: object
       properties:
         licenseCount:
@@ -11396,13 +11656,13 @@ components:
       required:
         - licenseCount
         - userCount
-    Data18:
+    Data16:
       type: object
       properties:
         metadata:
           type: array
           items:
-            $ref: '#/components/schemas/Metadata17'
+            $ref: '#/components/schemas/Metadata15'
         scoringCriteriaList:
           type: array
           items:
@@ -11410,7 +11670,7 @@ components:
       required:
         - metadata
         - scoringCriteriaList
-    Data19:
+    Data17:
       type: object
       properties:
         insightRules:
@@ -11420,10 +11680,24 @@ components:
         metadata:
           type: array
           items:
-            $ref: '#/components/schemas/Metadata18'
+            $ref: '#/components/schemas/Metadata16'
       required:
         - metadata
         - insightRules
+    Data18:
+      type: object
+      properties:
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metadata17'
+        paymentHistoryList:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistory'
+      required:
+        - metadata
+        - paymentHistoryList
     Data2:
       type: object
       properties:
@@ -11438,20 +11712,6 @@ components:
       required:
         - metadata
         - interactionReport
-    Data20:
-      type: object
-      properties:
-        metadata:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metadata19'
-        paymentHistoryList:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentHistory'
-      required:
-        - metadata
-        - paymentHistoryList
     Data3:
       type: object
       properties:
@@ -11523,20 +11783,6 @@ components:
     Data8:
       type: object
       properties:
-        metadata:
-          type: array
-          items:
-            $ref: '#/components/schemas/Metadata8'
-        rechurnData:
-          type: array
-          items:
-            $ref: '#/components/schemas/RechurnData'
-      required:
-        - metadata
-        - rechurnData
-    Data9:
-      type: object
-      properties:
         input:
           $ref: '#/components/schemas/Input'
         openCount:
@@ -11550,6 +11796,20 @@ components:
         - input
         - output
         - openCount
+    Data9:
+      type: object
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metadata8'
+      required:
+        - metadata
+        - customers
     DataAnalysis:
       type: object
       properties:
@@ -11597,8 +11857,6 @@ components:
     DataCleanupStatusResponse:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/Data16'
         message:
           nullable: true
           type: string
@@ -11607,7 +11865,6 @@ components:
           format: int64
       required:
         - statusCode
-        - data
     DataCountResponse:
       type: object
       properties:
@@ -11982,6 +12239,39 @@ components:
           type: array
           items:
             type: string
+    FacebookIntegrationStatus:
+      type: string
+      enum:
+        - connected
+        - disconnected
+    FacebookIntegrationStatusResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/FacebookStatus'
+        message:
+          type: string
+        statusCode:
+          type: integer
+          format: int64
+      required:
+        - statusCode
+        - message
+        - data
+    FacebookStatus:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          $ref: '#/components/schemas/FacebookIntegrationStatus'
+        uAt:
+          type: integer
+          format: int64
+      required:
+        - status
+        - uAt
+        - error
     FillerWord:
       type: object
       properties:
@@ -12081,7 +12371,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data11'
+          $ref: '#/components/schemas/Data10'
         message:
           type: string
         statusCode:
@@ -12221,6 +12511,10 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/SmsInteraction'
+        transferCustomerLog:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/CrossProcessTransferLog'
         type:
           type: string
         wabaSession (wabaSessionInteraction):
@@ -12238,6 +12532,63 @@ components:
       required:
         - dateTime
         - type
+    HistoryData:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryMetaData'
+      required:
+        - metadata
+        - data
+    HistoryFilter:
+      type: object
+      properties:
+        filterByAttempts:
+          nullable: true
+          type: string
+        filterIds:
+          nullable: true
+          type: array
+          items:
+            type: string
+        priority (priorities):
+          nullable: true
+          type: array
+          items:
+            type: integer
+            format: int64
+    HistoryMetaData:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int64
+        total:
+          type: integer
+          format: int64
+      required:
+        - total
+        - page
+    HistoryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/HistoryData'
+        message:
+          nullable: true
+          type: string
+        statusCode:
+          type: integer
+          format: int64
+      required:
+        - statusCode
+        - data
     Info:
       type: object
       properties:
@@ -12275,7 +12626,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data9'
+          $ref: '#/components/schemas/Data8'
         message:
           type: string
         statusCode:
@@ -12295,6 +12646,11 @@ components:
           nullable: true
           type: integer
           format: int64
+        custIntSrc (intentSources):
+          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/IntentSource2'
         duration:
           $ref: '#/components/schemas/DurationDto'
         exclUIds:
@@ -12326,7 +12682,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data19'
+          $ref: '#/components/schemas/Data17'
         message:
           type: string
         statusCode:
@@ -12407,15 +12763,30 @@ components:
     IntentSource:
       type: object
       properties:
-        keyword:
+        intent_name (intentName):
           type: string
         sources:
           type: array
           items:
             $ref: '#/components/schemas/Source'
       required:
-        - keyword
+        - intent_name (intentName)
         - sources
+    IntentSource2:
+      type: object
+      properties:
+        isEnabled:
+          nullable: true
+          type: boolean
+        keywords:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+      required:
+        - name
+        - keywords
     InteractionReport:
       type: object
       properties:
@@ -12678,7 +13049,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data17'
+          $ref: '#/components/schemas/Data15'
         message:
           type: string
         statusCode:
@@ -12991,18 +13362,6 @@ components:
     Metadata10:
       type: object
       properties:
-        page:
-          type: integer
-          format: int64
-        total:
-          type: integer
-          format: int64
-      required:
-        - total
-        - page
-    Metadata11:
-      type: object
-      properties:
         attemptedCount:
           type: integer
           format: int64
@@ -13020,6 +13379,18 @@ components:
         - notAttemptedCount
         - attemptedCount
         - page
+    Metadata11:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int64
+        total:
+          type: integer
+          format: int64
+      required:
+        - total
+        - page
     Metadata12:
       type: object
       properties:
@@ -13035,18 +13406,6 @@ components:
     Metadata13:
       type: object
       properties:
-        page:
-          type: integer
-          format: int64
-        total:
-          type: integer
-          format: int64
-      required:
-        - total
-        - page
-    Metadata14:
-      type: object
-      properties:
         key:
           nullable: true
           type: string
@@ -13054,7 +13413,7 @@ components:
           nullable: true
           type: integer
           format: int64
-    Metadata15:
+    Metadata14:
       type: object
       properties:
         active:
@@ -13078,19 +13437,7 @@ components:
         - pending
         - freeLicense
         - inactive
-    Metadata16:
-      type: object
-      properties:
-        page:
-          type: integer
-          format: int64
-        total:
-          type: integer
-          format: int64
-      required:
-        - total
-        - page
-    Metadata17:
+    Metadata15:
       type: object
       properties:
         configuredCriteriaNames:
@@ -13112,7 +13459,7 @@ components:
         - page
         - configuredProcessIds
         - configuredCriteriaNames
-    Metadata18:
+    Metadata16:
       type: object
       properties:
         configuredProcessIds:
@@ -13129,7 +13476,7 @@ components:
         - total
         - page
         - configuredProcessIds
-    Metadata19:
+    Metadata17:
       type: object
       properties:
         page:
@@ -13364,7 +13711,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data14'
+          $ref: '#/components/schemas/Data13'
         message:
           type: string
         statusCode:
@@ -13447,7 +13794,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data20'
+          $ref: '#/components/schemas/Data18'
         message:
           type: string
         statusCode:
@@ -13576,12 +13923,16 @@ components:
     Permissions:
       type: object
       properties:
+        blkAct (bulkActions):
+          $ref: '#/components/schemas/BulkActions'
         callRecording:
           $ref: '#/components/schemas/CallRecording2'
         callTracking:
           $ref: '#/components/schemas/CallTracking'
         customer:
           $ref: '#/components/schemas/Customer2'
+        intg (integration):
+          type: boolean
         login (loginToUserWeb):
           $ref: '#/components/schemas/LoginToUserWeb'
         maskCusPhone (maskCustomerPhoneNumber):
@@ -13590,10 +13941,9 @@ components:
           type: boolean
         reports:
           $ref: '#/components/schemas/Reports'
-        webAllocation:
-          type: boolean
       required:
-        - webAllocation
+        - blkAct (bulkActions)
+        - intg (integration)
         - processAdmin
         - maskCusPhone (maskCustomerPhoneNumber)
         - login (loginToUserWeb)
@@ -13782,52 +14132,6 @@ components:
         - statusCode
         - message
         - data (countData)
-    RechurnData:
-      type: object
-      properties:
-        allocatedTo:
-          type: array
-          items:
-            $ref: '#/components/schemas/AllocatedTo'
-        count:
-          $ref: '#/components/schemas/Count'
-        createdAt:
-          type: integer
-          format: int64
-        dtFltrTyp:
-          type: string
-        endEpoch:
-          type: integer
-          format: int64
-        filters:
-          type: array
-          items:
-            type: object
-        isCommonPool:
-          type: boolean
-        loc (selectedLocations):
-          nullable: true
-          type: array
-          items:
-            $ref: '#/components/schemas/LocationFilter'
-        startEpoch:
-          type: integer
-          format: int64
-        status:
-          type: string
-        user:
-          $ref: '#/components/schemas/RechurnUser'
-      required:
-        - user
-        - count
-        - status
-        - allocatedTo
-        - filters
-        - isCommonPool
-        - startEpoch
-        - endEpoch
-        - createdAt
-        - dtFltrTyp
     RechurnLog:
       type: object
       properties:
@@ -13851,8 +14155,6 @@ components:
     RechurnStatusResponse:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/Data8'
         message:
           nullable: true
           type: string
@@ -13861,17 +14163,6 @@ components:
           format: int64
       required:
         - statusCode
-        - data
-    RechurnUser:
-      type: object
-      properties:
-        _id (id):
-          type: string
-        name:
-          type: string
-      required:
-        - _id (id)
-        - name
     RecurringFollowup:
       type: object
       properties:
@@ -14086,7 +14377,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data13'
+          $ref: '#/components/schemas/Data12'
         message:
           type: string
         statusCode:
@@ -14293,9 +14584,6 @@ components:
       properties:
         _id (id):
           type: string
-        atmpCalCnt:
-          nullable: true
-          type: string
         cAt (createdAt):
           type: integer
           format: int64
@@ -14307,14 +14595,19 @@ components:
           format: int64
         crId (creatorId):
           type: string
-        ctFldIds (fields):
-          type: array
-          items:
-            type: string
+        ctFldIds (filters):
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/HistoryFilter'
         iDwnD (downloadData):
           type: boolean
         iRmCtmS3M (deleteCustomS3Media):
           type: boolean
+        loc (selectedLocations):
+          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/LocationFilter'
         pId (processId):
           type: string
         sDT (startDateTime):
@@ -14333,7 +14626,6 @@ components:
         - iDwnD (downloadData)
         - iRmCtmS3M (deleteCustomS3Media)
         - uIds (userIds)
-        - ctFldIds (fields)
         - crId (creatorId)
         - cAt (createdAt)
     ScheduledCleanupResponse:
@@ -14423,7 +14715,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data18'
+          $ref: '#/components/schemas/Data16'
         message:
           type: string
         statusCode:
@@ -14841,7 +15133,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Data15'
+          $ref: '#/components/schemas/Data14'
         message:
           type: string
         statusCode:
@@ -14951,6 +15243,32 @@ components:
         - speaker
         - utterance
         - loudness
+    TransferAssign:
+      type: object
+      properties:
+        fId (fromUserId):
+          type: string
+        fN (fromUserName):
+          type: string
+        tId (toUserId):
+          type: string
+        tN (toUserName):
+          type: string
+      required:
+        - fId (fromUserId)
+        - fN (fromUserName)
+        - tId (toUserId)
+        - tN (toUserName)
+    TransferCustomFieldMapping:
+      type: object
+      properties:
+        sFId (sourceFieldId):
+          type: string
+        tFId (targetFieldId):
+          type: string
+      required:
+        - sFId (sourceFieldId)
+        - tFId (targetFieldId)
     TriggerEnum:
       type: string
       enum:
@@ -15493,20 +15811,6 @@ components:
         - idle
         - inactiveUser
         - missedCheckIn
-    UserStatusNotificationPayload:
-      type: object
-      properties:
-        duration:
-          type: integer
-          format: int64
-        unit:
-          type: string
-        userStatusNotificationType:
-          type: string
-      required:
-        - userStatusNotificationType
-        - duration
-        - unit
     Value:
       type: string
       enum:
@@ -15870,7 +16174,7 @@ components:
         metadata:
           type: array
           items:
-            $ref: '#/components/schemas/Metadata13'
+            $ref: '#/components/schemas/Metadata12'
       required:
         - metadata
         - data
