@@ -1884,12 +1884,12 @@ paths:
       parameters:
         - name: fromProcessId
           in: query
-          required: true
+          required: false
           schema:
             type: string
         - name: toProcessId
           in: query
-          required: true
+          required: false
           schema:
             type: string
       responses:
@@ -3619,11 +3619,11 @@ paths:
           required: false
           schema:
             type: boolean
-        # - name: searchBy      #enum is there
-        #   in: query
-        #   required: false
-        #   schema:
-        #     type: string
+        - name: searchBy
+          in: query
+          required: false
+          schema:
+            type: string
         - name: type
           in: query
           required: false
@@ -8239,7 +8239,9 @@ components:
         action_item (actionItem):
           type: string
         assignee:
-          $ref: '#/components/schemas/Speaker'
+          default: AGENT
+          allOf:
+            - $ref: '#/components/schemas/Speaker'
         deadline:
           type: string
       required:
@@ -8322,7 +8324,7 @@ components:
         country:
           nullable: true
           type: string
-        countryCode:
+        country_code (countryCode):
           nullable: true
           type: string
         state:
@@ -8344,7 +8346,7 @@ components:
           type: string
         country:
           type: string
-        postalCode:
+        postal_code (postalCode):
           type: string
         state:
           type: string
@@ -8352,7 +8354,7 @@ components:
         - city
         - state
         - country
-        - postalCode
+        - postal_code (postalCode)
     AdminWebTokenRefreshResponse:
       type: object
       properties:
@@ -8444,7 +8446,9 @@ components:
         title:
           type: string
         type (callScoringParameterType):
-          $ref: '#/components/schemas/CallScoringParameterType'
+          default: DEFAULT
+          allOf:
+            - $ref: '#/components/schemas/CallScoringParameterType'
         vL (veryLoudScore):
           type: integer
           format: int64
@@ -8478,7 +8482,9 @@ components:
         title:
           type: string
         type (callScoringParameterType):
-          $ref: '#/components/schemas/CallScoringParameterType'
+          default: DEFAULT
+          allOf:
+            - $ref: '#/components/schemas/CallScoringParameterType'
         wtage (controller):
           nullable: true
           allOf:
@@ -9030,7 +9036,9 @@ components:
         _id (id):
           type: string
         access:
-          $ref: '#/components/schemas/ApiKeyAccessTypes'
+          default: free
+          allOf:
+            - $ref: '#/components/schemas/ApiKeyAccessTypes'
         apiKey:
           type: string
         companyId:
@@ -9342,7 +9350,9 @@ components:
       type: object
       properties:
         complianceScoreType:
-          $ref: '#/components/schemas/ComplianceScoreType'
+          default: yesPositive
+          allOf:
+            - $ref: '#/components/schemas/ComplianceScoreType'
         iE (isEnabled):
           type: boolean
         isCustomizable:
@@ -9352,7 +9362,9 @@ components:
         title:
           type: string
         type (callScoringParameterType):
-          $ref: '#/components/schemas/CallScoringParameterType'
+          default: DEFAULT
+          allOf:
+            - $ref: '#/components/schemas/CallScoringParameterType'
         wtage (controller):
           nullable: true
           allOf:
@@ -9376,7 +9388,9 @@ components:
         title:
           type: string
         type (callScoringParameterType):
-          $ref: '#/components/schemas/CallScoringParameterType'
+          default: DEFAULT
+          allOf:
+            - $ref: '#/components/schemas/CallScoringParameterType'
         wtage (controller):
           nullable: true
           allOf:
@@ -9394,7 +9408,9 @@ components:
           type: integer
           format: int64
         prdcty (periodicity):
-          $ref: '#/components/schemas/SubscriptionPeriodicity'
+          default: Q
+          allOf:
+            - $ref: '#/components/schemas/SubscriptionPeriodicity'
       required:
         - prdcty (periodicity)
         - licC (licenseCount)
@@ -9460,7 +9476,9 @@ components:
           type: number
           format: double
         value:
-          $ref: '#/components/schemas/Value'
+          default: NA
+          allOf:
+            - $ref: '#/components/schemas/Value'
       required:
         - value
         - score
@@ -9479,15 +9497,14 @@ components:
       type: object
       properties:
         blkDel (bulkDelete):
+          nullable: true
           type: boolean
         blkExp (bulkExport):
+          nullable: true
           type: boolean
         blkImp (bulkImport):
+          nullable: true
           type: boolean
-      required:
-        - blkImp (bulkImport)
-        - blkExp (bulkExport)
-        - blkDel (bulkDelete)
     BulkAddOnPayload:
       type: object
       properties:
@@ -9638,17 +9655,20 @@ components:
     Call:
       type: object
       properties:
-        analysis:
+        _id (id):
+          nullable: true
+          type: string
+        anlys (analysis):
           nullable: true
           allOf:
             - $ref: '#/components/schemas/Analysis'
-        callLogId:
-          nullable: true
-          type: string
-        cloudTelephony:
+        cT (cloudTelephony):
           nullable: true
           allOf:
             - $ref: '#/components/schemas/CloudTelephony2'
+        callLogId:
+          nullable: true
+          type: string
         createdAt:
           nullable: true
           type: integer
@@ -9664,21 +9684,18 @@ components:
         hiveKey:
           nullable: true
           type: string
-        id:
-          nullable: true
-          type: string
         isCustomerFetched:
           type: boolean
-        isDeleted:
+        isDel (isDeleted):
           type: boolean
-        isDncrNumber:
+        isDncrNum (isDncrNumber):
           type: boolean
         owner:
           nullable: true
           type: string
         restrictCall:
           type: boolean
-        simSlotDetails:
+        slotDetails (simSlotDetails):
           nullable: true
           allOf:
             - $ref: '#/components/schemas/SimSlotDetails'
@@ -9691,9 +9708,9 @@ components:
             - $ref: '#/components/schemas/CallUser'
       required:
         - restrictCall
-        - isDeleted
+        - isDel (isDeleted)
         - isCustomerFetched
-        - isDncrNumber
+        - isDncrNum (isDncrNumber)
     CallAnalyticsAgentData:
       type: object
       properties:
@@ -10319,10 +10336,10 @@ components:
     CloudTelephony2:
       type: object
       properties:
-        _id (id):
+        cpId:
           nullable: true
           type: string
-        cpId:
+        id:
           nullable: true
           type: string
         num:
@@ -10368,12 +10385,12 @@ components:
     Company2:
       type: object
       properties:
-        id:
+        _id (id):
           type: string
         name:
           type: string
       required:
-        - id
+        - _id (id)
         - name
     CompanyAddOn:
       type: object
@@ -11052,7 +11069,9 @@ components:
         licP (licensePrice):
           $ref: '#/components/schemas/LicensePrice'
         prdcty (periodicity):
-          $ref: '#/components/schemas/SubscriptionPeriodicity'
+          default: Q
+          allOf:
+            - $ref: '#/components/schemas/SubscriptionPeriodicity'
         type:
           type: string
       required:
@@ -11081,7 +11100,9 @@ components:
         paramName (title):
           type: string
         type (callScoringParameterType):
-          $ref: '#/components/schemas/CallScoringParameterType'
+          default: DEFAULT
+          allOf:
+            - $ref: '#/components/schemas/CallScoringParameterType'
         wtage (controller):
           nullable: true
           allOf:
@@ -11232,28 +11253,28 @@ components:
     Customer2:
       type: object
       properties:
-        assignCustomer:
+        asgn (assignCustomer):
           type: boolean
-        deleteCustomer:
+        delete (deleteCustomer):
           type: boolean
-        editCustomer:
+        edit (editCustomer):
           type: boolean
-        rechurnCustomer:
+        rHist (restrictHistory):
           type: boolean
-        restrictHistory:
+        rchn (rechurnCustomer):
           type: boolean
-        transferBetweenProcesses:
+        tBPrcs (transferBetweenProcesses):
           nullable: true
           type: boolean
-        viewCustomer:
+        view (viewCustomer):
           type: boolean
       required:
-        - deleteCustomer
-        - viewCustomer
-        - editCustomer
-        - assignCustomer
-        - rechurnCustomer
-        - restrictHistory
+        - delete (deleteCustomer)
+        - view (viewCustomer)
+        - edit (editCustomer)
+        - asgn (assignCustomer)
+        - rchn (rechurnCustomer)
+        - rHist (restrictHistory)
     CustomerAnalyticsAgentData:
       type: object
       properties:
@@ -11560,21 +11581,21 @@ components:
     Data:
       type: object
       properties:
+        data (scheduledReports):
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduledReport'
         metadata:
           type: array
           items:
             $ref: '#/components/schemas/Metadata'
-        scheduledReports:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScheduledReport'
       required:
         - metadata
-        - scheduledReports
+        - data (scheduledReports)
     Data10:
       type: object
       properties:
-        followups:
+        data (followups):
           type: array
           items:
             $ref: '#/components/schemas/FollowUp'
@@ -11584,7 +11605,7 @@ components:
             $ref: '#/components/schemas/Metadata9'
       required:
         - metadata
-        - followups
+        - data (followups)
     Data11:
       type: object
       properties:
@@ -11612,17 +11633,17 @@ components:
     Data12:
       type: object
       properties:
+        data (reportsHistory):
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportsHistory'
         metadata:
           type: array
           items:
             $ref: '#/components/schemas/Metadata11'
-        reportsHistory:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReportsHistory'
       required:
         - metadata
-        - reportsHistory
+        - data (reportsHistory)
     Data13:
       type: object
       properties:
@@ -11633,17 +11654,17 @@ components:
     Data14:
       type: object
       properties:
+        data (usersList):
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamUser'
         metadata:
           type: array
           items:
             $ref: '#/components/schemas/Metadata14'
-        usersList:
-          type: array
-          items:
-            $ref: '#/components/schemas/TeamUser'
       required:
         - metadata
-        - usersList
+        - data (usersList)
     Data15:
       type: object
       properties:
@@ -11659,21 +11680,21 @@ components:
     Data16:
       type: object
       properties:
+        data (scoringCriteriaList):
+          type: array
+          items:
+            $ref: '#/components/schemas/CallScoringCriteria'
         metadata:
           type: array
           items:
             $ref: '#/components/schemas/Metadata15'
-        scoringCriteriaList:
-          type: array
-          items:
-            $ref: '#/components/schemas/CallScoringCriteria'
       required:
         - metadata
-        - scoringCriteriaList
+        - data (scoringCriteriaList)
     Data17:
       type: object
       properties:
-        insightRules:
+        data (insightRules):
           type: array
           items:
             $ref: '#/components/schemas/InsightRuleDtoModel'
@@ -11683,25 +11704,25 @@ components:
             $ref: '#/components/schemas/Metadata16'
       required:
         - metadata
-        - insightRules
+        - data (insightRules)
     Data18:
       type: object
       properties:
+        data (paymentHistoryList):
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistory'
         metadata:
           type: array
           items:
             $ref: '#/components/schemas/Metadata17'
-        paymentHistoryList:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentHistory'
       required:
         - metadata
-        - paymentHistoryList
+        - data (paymentHistoryList)
     Data2:
       type: object
       properties:
-        interactionReport:
+        data (interactionReport):
           type: array
           items:
             $ref: '#/components/schemas/InteractionReport'
@@ -11711,25 +11732,25 @@ components:
             $ref: '#/components/schemas/Metadata2'
       required:
         - metadata
-        - interactionReport
+        - data (interactionReport)
     Data3:
       type: object
       properties:
+        data (recurringFollowups):
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerRecurringFollowup'
         metadata:
           type: array
           items:
             $ref: '#/components/schemas/Metadata3'
-        recurringFollowups:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomerRecurringFollowup'
       required:
         - metadata
-        - recurringFollowups
+        - data (recurringFollowups)
     Data4:
       type: object
       properties:
-        callAnalyticsAgentDataList:
+        data (callAnalyticsAgentDataList):
           type: array
           items:
             $ref: '#/components/schemas/CallAnalyticsAgentData'
@@ -11739,23 +11760,23 @@ components:
             $ref: '#/components/schemas/Metadata4'
       required:
         - metadata
-        - callAnalyticsAgentDataList
+        - data (callAnalyticsAgentDataList)
     Data5:
       type: object
       properties:
-        allocationAnalyticsAgentData:
+        data (allocationAnalyticsAgentData):
           type: array
           items:
             $ref: '#/components/schemas/AllocationAnalyticsAgentData'
         metadata:
           $ref: '#/components/schemas/Metadata5'
       required:
-        - allocationAnalyticsAgentData
+        - data (allocationAnalyticsAgentData)
         - metadata
     Data6:
       type: object
       properties:
-        customerAnalyticsAgentDataList:
+        data (customerAnalyticsAgentDataList):
           type: array
           items:
             $ref: '#/components/schemas/CustomerAnalyticsAgentData'
@@ -11765,11 +11786,11 @@ components:
             $ref: '#/components/schemas/Metadata6'
       required:
         - metadata
-        - customerAnalyticsAgentDataList
+        - data (customerAnalyticsAgentDataList)
     Data7:
       type: object
       properties:
-        calls:
+        data (calls):
           type: array
           items:
             $ref: '#/components/schemas/Call'
@@ -11779,7 +11800,7 @@ components:
             $ref: '#/components/schemas/Metadata7'
       required:
         - metadata
-        - calls
+        - data (calls)
     Data8:
       type: object
       properties:
@@ -11799,7 +11820,7 @@ components:
     Data9:
       type: object
       properties:
-        customers:
+        data (customers):
           type: array
           items:
             $ref: '#/components/schemas/Customer'
@@ -11809,7 +11830,7 @@ components:
             $ref: '#/components/schemas/Metadata8'
       required:
         - metadata
-        - customers
+        - data (customers)
     DataAnalysis:
       type: object
       properties:
@@ -12210,7 +12231,9 @@ components:
       type: object
       properties:
         speaker:
-          $ref: '#/components/schemas/Speaker'
+          default: AGENT
+          allOf:
+            - $ref: '#/components/schemas/Speaker'
         timestamps:
           type: string
         utterance:
@@ -12264,7 +12287,9 @@ components:
         error:
           type: string
         status:
-          $ref: '#/components/schemas/FacebookIntegrationStatus'
+          default: connected
+          allOf:
+            - $ref: '#/components/schemas/FacebookIntegrationStatus'
         uAt:
           type: integer
           format: int64
@@ -12301,7 +12326,9 @@ components:
         title:
           type: string
         type (callScoringParameterType):
-          $ref: '#/components/schemas/CallScoringParameterType'
+          default: DEFAULT
+          allOf:
+            - $ref: '#/components/schemas/CallScoringParameterType'
         wtage (controller):
           nullable: true
           allOf:
@@ -12775,10 +12802,10 @@ components:
     IntentSource2:
       type: object
       properties:
-        isEnabled:
+        iE (isEnabled):
           nullable: true
           type: boolean
-        keywords:
+        kW (keywords):
           type: array
           items:
             type: string
@@ -12786,7 +12813,7 @@ components:
           type: string
       required:
         - name
-        - keywords
+        - kW (keywords)
     InteractionReport:
       type: object
       properties:
@@ -13226,9 +13253,13 @@ components:
       type: object
       properties:
         mob (mobile):
-          $ref: '#/components/schemas/LogoutPolicy'
+          default: standard
+          allOf:
+            - $ref: '#/components/schemas/LogoutPolicy'
         web:
-          $ref: '#/components/schemas/LogoutPolicy'
+          default: standard
+          allOf:
+            - $ref: '#/components/schemas/LogoutPolicy'
       required:
         - mob (mobile)
         - web
@@ -13422,13 +13453,13 @@ components:
         freeLicense:
           type: integer
           format: int64
-        inactive:
-          type: integer
-          format: int64
         page:
           type: integer
           format: int64
         pending:
+          type: integer
+          format: int64
+        suspended (inactive):
           type: integer
           format: int64
       required:
@@ -13436,33 +13467,33 @@ components:
         - active
         - pending
         - freeLicense
-        - inactive
+        - suspended (inactive)
     Metadata15:
       type: object
       properties:
-        configuredCriteriaNames:
-          type: array
-          items:
-            type: string
-        configuredProcessIds:
+        criteriaName (configuredCriteriaNames):
           type: array
           items:
             type: string
         page:
           type: integer
           format: int64
+        processIds (configuredProcessIds):
+          type: array
+          items:
+            type: string
         total:
           type: integer
           format: int64
       required:
         - total
         - page
-        - configuredProcessIds
-        - configuredCriteriaNames
+        - processIds (configuredProcessIds)
+        - criteriaName (configuredCriteriaNames)
     Metadata16:
       type: object
       properties:
-        configuredProcessIds:
+        pIds (configuredProcessIds):
           type: array
           items:
             type: string
@@ -13475,7 +13506,7 @@ components:
       required:
         - total
         - page
-        - configuredProcessIds
+        - pIds (configuredProcessIds)
     Metadata17:
       type: object
       properties:
@@ -13518,11 +13549,11 @@ components:
         page:
           type: integer
           format: int64
-        totalUsers:
+        total (totalUsers):
           type: integer
           format: int64
       required:
-        - totalUsers
+        - total (totalUsers)
         - page
     Metadata5:
       type: object
@@ -13546,11 +13577,11 @@ components:
         page:
           type: integer
           format: int64
-        totalUsers:
+        total (totalUsers):
           type: integer
           format: int64
       required:
-        - totalUsers
+        - total (totalUsers)
         - page
     Metadata7:
       type: object
@@ -13775,7 +13806,9 @@ components:
           nullable: true
           type: string
         paymentStatus:
-          $ref: '#/components/schemas/PaymentStatus'
+          default: PENDING
+          allOf:
+            - $ref: '#/components/schemas/PaymentStatus'
         paymentType:
           type: string
         subscriptionPlan:
@@ -13932,6 +13965,7 @@ components:
         customer:
           $ref: '#/components/schemas/Customer2'
         intg (integration):
+          nullable: true
           type: boolean
         login (loginToUserWeb):
           $ref: '#/components/schemas/LoginToUserWeb'
@@ -13941,9 +13975,11 @@ components:
           type: boolean
         reports:
           $ref: '#/components/schemas/Reports'
+        webAllocation:
+          type: boolean
       required:
+        - webAllocation
         - blkAct (bulkActions)
-        - intg (integration)
         - processAdmin
         - maskCusPhone (maskCustomerPhoneNumber)
         - login (loginToUserWeb)
@@ -14074,7 +14110,9 @@ components:
         name:
           type: string
         type:
-          $ref: '#/components/schemas/Type'
+          default: BOTH
+          allOf:
+            - $ref: '#/components/schemas/Type'
       required:
         - _id (id)
         - name
@@ -14883,7 +14921,9 @@ components:
         source:
           type: string
         speaker:
-          $ref: '#/components/schemas/Speaker'
+          default: AGENT
+          allOf:
+            - $ref: '#/components/schemas/Speaker'
       required:
         - speaker
         - source
@@ -15232,7 +15272,9 @@ components:
           type: number
           format: double
         speaker:
-          $ref: '#/components/schemas/Speaker'
+          default: AGENT
+          allOf:
+            - $ref: '#/components/schemas/Speaker'
         start_time (startTime):
           type: string
         utterance:
@@ -15322,12 +15364,16 @@ components:
         sourceName:
           type: string
         sourceType:
-          $ref: '#/components/schemas/SourceType'
+          default: webhook
+          allOf:
+            - $ref: '#/components/schemas/SourceType'
         timestamp:
           type: integer
           format: int64
         type:
-          $ref: '#/components/schemas/TriggerEnum'
+          default: initCall
+          allOf:
+            - $ref: '#/components/schemas/TriggerEnum'
       required:
         - processId
         - processName
@@ -15892,7 +15938,7 @@ components:
     Waba2:
       type: object
       properties:
-        amountPaid:
+        amtP (amountPaid):
           nullable: true
           type: number
           format: double
@@ -15900,7 +15946,7 @@ components:
           nullable: true
           type: integer
           format: int64
-        licenseCount:
+        licC (licenseCount):
           type: integer
           format: int64
         userIds:
@@ -15908,7 +15954,7 @@ components:
           items:
             type: string
       required:
-        - licenseCount
+        - licC (licenseCount)
         - userIds
     WabaAddOn:
       type: object
@@ -16024,7 +16070,9 @@ components:
           nullable: true
           type: string
         dir (direction):
-          $ref: '#/components/schemas/WabaMessageDirectionTypes'
+          default: INCOMING
+          allOf:
+            - $ref: '#/components/schemas/WabaMessageDirectionTypes'
         err (error):
           nullable: true
           allOf:
@@ -16054,7 +16102,9 @@ components:
           nullable: true
           type: string
         sts (status):
-          $ref: '#/components/schemas/WabaMessageStatusTypes'
+          default: DELETED
+          allOf:
+            - $ref: '#/components/schemas/WabaMessageStatusTypes'
         text:
           nullable: true
           type: string
@@ -16064,7 +16114,9 @@ components:
           items:
             $ref: '#/components/schemas/Component'
         type:
-          $ref: '#/components/schemas/WabaMessageTypes'
+          default: TEXT
+          allOf:
+            - $ref: '#/components/schemas/WabaMessageTypes'
         user_id (userId):
           type: string
       required:
@@ -16117,7 +16169,9 @@ components:
         sId (sessionId):
           type: string
         type (sessionType):
-          $ref: '#/components/schemas/SessionType'
+          default: START
+          allOf:
+            - $ref: '#/components/schemas/SessionType'
         uId (userId):
           type: string
       required:
